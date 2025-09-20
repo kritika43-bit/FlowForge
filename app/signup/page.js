@@ -17,6 +17,8 @@ export default function SignupPage() {
   const [formData, setFormData] = useState({
     loginId: '',
     email: '',
+    firstName: '',
+    lastName: '',
     password: '',
     confirmPassword: '',
   });
@@ -97,7 +99,11 @@ export default function SignupPage() {
       const userData = {
         loginId: formData.loginId,
         email: formData.email,
+        firstName: formData.firstName || 'User',
+        lastName: formData.lastName || '',
         password: formData.password,
+        position: 'Operator',
+        department: 'Manufacturing',
       };
       
       await signup(userData);
@@ -153,6 +159,46 @@ export default function SignupPage() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="firstName" className="text-sm font-medium text-slate-700">
+                  First Name
+                </Label>
+                <Input
+                  id="firstName"
+                  name="firstName"
+                  type="text"
+                  value={formData.firstName}
+                  onChange={handleChange}
+                  placeholder="Enter First Name"
+                  className={`transition-colors ${errors.firstName ? 'border-red-500 focus:border-red-500' : 'focus:border-teal-500'}`}
+                  disabled={isLoading}
+                />
+                {errors.firstName && (
+                  <p className="text-xs text-red-600">{errors.firstName}</p>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="lastName" className="text-sm font-medium text-slate-700">
+                  Last Name
+                </Label>
+                <Input
+                  id="lastName"
+                  name="lastName"
+                  type="text"
+                  value={formData.lastName}
+                  onChange={handleChange}
+                  placeholder="Enter Last Name"
+                  className={`transition-colors ${errors.lastName ? 'border-red-500 focus:border-red-500' : 'focus:border-teal-500'}`}
+                  disabled={isLoading}
+                />
+                {errors.lastName && (
+                  <p className="text-xs text-red-600">{errors.lastName}</p>
+                )}
+              </div>
+            </div>
+
             <div className="space-y-2">
               <Label htmlFor="loginId" className="text-sm font-medium text-slate-700">
                 Login ID

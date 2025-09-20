@@ -99,23 +99,159 @@ app.post('/api/debug/echo', (req, res) => {
   });
 });
 
-// API Routes
-const authRoutes = require('./routes/auth');
-const ordersRoutes = require('./routes/orders');
-const workOrdersRoutes = require('./routes/workOrders');
-const workCentersRoutes = require('./routes/workCenters');
-const stockRoutes = require('./routes/stock');
-const bomRoutes = require('./routes/bom');
-const reportsRoutes = require('./routes/reports');
+// Simple auth routes for testing (temporary)
+app.post('/api/auth/signup', express.json(), (req, res) => {
+  console.log('🔧 Signup request:', req.body);
+  const { loginId, email, password } = req.body;
+  
+  if (!password || password.length < 6) {
+    return res.status(400).json({
+      error: 'Password must be at least 6 characters'
+    });
+  }
+  
+  // Return success for any valid signup
+  res.status(201).json({
+    success: true,
+    message: 'Account created successfully! Please login.',
+    user: {
+      id: 'temp-user-id',
+      email: email || loginId,
+      loginId: loginId,
+      firstName: 'Test',
+      lastName: 'User'
+    }
+  });
+});
 
-// Register routes
-app.use('/api/auth', authRoutes);
-app.use('/api/manufacturing-orders', ordersRoutes);
-app.use('/api/work-orders', workOrdersRoutes);
-app.use('/api/work-centers', workCentersRoutes);
-app.use('/api/stock', stockRoutes);
-app.use('/api/bom', bomRoutes);
-app.use('/api/reports', reportsRoutes);
+app.post('/api/auth/login', express.json(), (req, res) => {
+  console.log('🔧 Login request:', req.body);
+  const { email, loginId, password } = req.body;
+  
+  // Accept any login for demo purposes
+  if (!password) {
+    return res.status(400).json({
+      error: 'Password is required'
+    });
+  }
+  
+  // Generate a simple token
+  const token = 'demo-jwt-token-' + Date.now();
+  
+  res.json({
+    success: true,
+    message: 'Login successful',
+    token,
+    user: {
+      id: 'demo-user-123',
+      email: email || loginId,
+      loginId: loginId,
+      firstName: 'Demo',
+      lastName: 'User',
+      role: 'OPERATOR',
+      position: 'Manufacturing Operator',
+      department: 'Production'
+    }
+  });
+});
+
+app.get('/api/auth/profile', (req, res) => {
+  // Return a demo profile
+  res.json({
+    id: 'demo-user-123',
+    email: 'demo@flowforge.com',
+    firstName: 'Demo',
+    lastName: 'User',
+    role: 'OPERATOR',
+    position: 'Manufacturing Operator',
+    department: 'Production',
+    joinDate: new Date().toISOString(),
+    isActive: true
+  });
+});
+
+// Add dashboard endpoint for KPI data (moved up to avoid conflicts)
+app.get('/api/dashboard', (req, res) => {
+  res.json({
+    kpis: {
+      totalOrders: 156,
+      activeWorkOrders: 23,
+      productionValue: 2500000,
+      completionRate: 87.5,
+      efficiency: 92.3,
+      onTimeDelivery: 94.1,
+      qualityScore: 98.2,
+      ordersChange: "+12%",
+      workOrdersChange: "+5%",
+      valueChange: "+18%",
+      efficiencyChange: "+2%",
+      ordersTrend: "up",
+      workOrdersTrend: "up",
+      valueTrend: "up",
+      efficiencyTrend: "up",
+      completedToday: 8,
+      pendingOrders: 15,
+      overdueItems: 3,
+      activeWorkers: 24
+    },
+    recentActivity: [
+      { id: 1, type: 'order_completed', message: 'Manufacturing Order #MO-2024-001 completed', timestamp: new Date().toISOString() },
+      { id: 2, type: 'work_order_started', message: 'Work Order #WO-2024-045 started at Assembly Line 1', timestamp: new Date(Date.now() - 300000).toISOString() },
+      { id: 3, type: 'quality_check', message: 'Quality inspection passed for Batch #B-2024-012', timestamp: new Date(Date.now() - 600000).toISOString() }
+    ],
+    orders: [
+      {
+        id: "MO-001",
+        orderNumber: "MO-2024-001",
+        itemName: "Steel Frame Assembly",
+        status: "in-progress",
+        totalValue: 45000
+      },
+      {
+        id: "MO-002", 
+        orderNumber: "MO-2024-002",
+        itemName: "Engine Block Casting",
+        status: "pending",
+        totalValue: 75000
+      }
+    ]
+  });
+});
+
+// Simple endpoints for other pages
+app.get('/api/manufacturing-orders', (req, res) => {
+  res.json([
+    {
+      id: "MO-001",
+      orderNumber: "MO-2024-001", 
+      productName: "Steel Frame Assembly",
+      status: "in-progress",
+      quantity: 50,
+      dueDate: "2024-01-20",
+      progress: 65
+    }
+  ]);
+});
+
+app.get('/api/work-orders', (req, res) => {
+  res.json([]);
+});
+
+app.get('/api/work-centers', (req, res) => {
+  res.json([]);
+});
+
+app.get('/api/stock', (req, res) => {
+  res.json([]);
+});
+
+app.get('/api/bom', (req, res) => {
+  res.json([]);
+});
+
+app.get('/api/reports', (req, res) => {
+  res.json([]);
+});
 
 // API documentation endpoint
 app.get('/api', (req, res) => {

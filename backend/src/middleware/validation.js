@@ -22,21 +22,23 @@ const validateRegister = [
     .isLength({ min: 6 })
     .withMessage('Password must be at least 6 characters long'),
   body('firstName')
+    .optional()
     .trim()
     .isLength({ min: 1 })
     .withMessage('First name is required'),
   body('lastName')
+    .optional()
     .trim()
     .isLength({ min: 1 })
     .withMessage('Last name is required'),
   body('position')
+    .optional()
     .trim()
-    .isLength({ min: 1 })
-    .withMessage('Position is required'),
+    .default('Operator'),
   body('department')
+    .optional()
     .trim()
-    .isLength({ min: 1 })
-    .withMessage('Department is required'),
+    .default('Manufacturing'),
   body('role')
     .optional()
     .isIn(['ADMIN', 'MANAGER', 'OPERATOR', 'INVENTORY'])
@@ -47,9 +49,13 @@ const validateRegister = [
 // User login validation
 const validateLogin = [
   body('email')
+    .optional()
     .isEmail()
     .normalizeEmail()
     .withMessage('Please provide a valid email'),
+  body('loginId')
+    .optional()
+    .trim(),
   body('password')
     .notEmpty()
     .withMessage('Password is required'),

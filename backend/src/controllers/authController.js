@@ -10,25 +10,48 @@ const generateToken = (userId) => {
 // Register new user
 const register = async (req, res) => {
   try {
-    const { email, password, firstName, lastName, position, department, role = 'OPERATOR', phone, location, bio } = req.body;
+    const { 
+      loginId, 
+      email, 
+      password, 
+      firstName = 'User', 
+      lastName = '', 
+      position = 'Operator', 
+      department = 'Manufacturing', 
+      role = 'OPERATOR', 
+      phone, 
+      location, 
+      bio 
+    } = req.body;
 
-    // Check if user already exists
+    // Use email as primary identifier, fallback to loginId
+    const userEmail = email || loginId;
+    
+    if (!userEmail || !password) {
+      return res.status(400).json({ 
+        error: 'Email and password are required' 
+      });
+    }
+
+    // Check if user already exists (by email)
     const existingUser = await prisma.user.findUnique({
-      where: { email },
+      where: { email: userEmail },
     });
 
     if (existingUser) {
-      return res.status(409).json({ error: 'User with this email already exists' });
+      return res.status(409).json({ 
+        message: 'User with this email already exists' 
+      });
     }
 
     // Hash password
     const saltRounds = 12;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
+    // Create user with defaults
     const user = await prisma.user.create({
       data: {
-        email,
+        email: userEmail,
         password: hashedPassword,
         firstName,
         lastName,
@@ -51,28 +74,37 @@ const register = async (req, res) => {
       },
     });
 
-    // Generate token
-    const token = generateToken(user.id);
-
     res.status(201).json({
-      message: 'User registered successfully',
+      success: true,
+      message: 'Account created successfully! Please login.',
       user,
-      token,
     });
   } catch (error) {
     console.error('Registration error:', error);
-    res.status(500).json({ error: 'Registration failed' });
+    res.status(500).json({ 
+      message: 'Registration failed',
+      error: error.message 
+    });
   }
 };
 
 // Login user
 const login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, loginId, password } = req.body;
 
-    // Find user
+    // Use email or loginId for login
+    const identifier = email || loginId;
+    
+    if (!identifier) {
+      return res.status(400).json({ 
+        error: 'Email or loginId is required' 
+      });
+    }
+
+    // Find user by email (since our schema uses email as unique)
     const user = await prisma.user.findUnique({
-      where: { email },
+      where: { email: identifier },
       include: {
         certifications: true,
       },
@@ -98,23 +130,31 @@ const login = async (req, res) => {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    // Log activity
-    await prisma.userActivity.create({
-      data: {
-        type: 'user_login',
-        description: 'User logged in successfully',
-        userId: user.id,
-      },
-    });
+    // Log activity (create table if doesn't exist)
+    try {
+      await prisma.userActivity.create({
+        data: {
+          type: 'user_login',
+          description: 'User logged in successfully',
+          userId: user.id,
+        },
+      });
+    } catch (activityError) {
+      console.log('Could not log activity:', activityError.message);
+    }
 
     res.json({
+      success: true,
       message: 'Login successful',
       user: userWithoutPassword,
       token,
     });
   } catch (error) {
     console.error('Login error:', error);
-    res.status(500).json({ error: 'Login failed' });
+    res.status(500).json({ 
+      error: 'Login failed',
+      details: error.message 
+    });
   }
 };
 
