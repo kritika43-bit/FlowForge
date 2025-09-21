@@ -199,6 +199,23 @@ app.get('/api/dashboard', (req, res) => {
       { id: 2, type: 'work_order_started', message: 'Work Order #WO-2024-045 started at Assembly Line 1', timestamp: new Date(Date.now() - 300000).toISOString() },
       { id: 3, type: 'quality_check', message: 'Quality inspection passed for Batch #B-2024-012', timestamp: new Date(Date.now() - 600000).toISOString() }
     ],
+    charts: {
+      production: [
+        { name: 'Mon', value: 120 },
+        { name: 'Tue', value: 135 },
+        { name: 'Wed', value: 148 },
+        { name: 'Thu', value: 142 },
+        { name: 'Fri', value: 156 },
+        { name: 'Sat', value: 98 },
+        { name: 'Sun', value: 87 }
+      ],
+      efficiency: [
+        { name: 'Line 1', value: 94 },
+        { name: 'Line 2', value: 87 },
+        { name: 'Line 3', value: 92 },
+        { name: 'Line 4', value: 89 }
+      ]
+    },
     orders: [
       {
         id: "MO-001",
@@ -271,46 +288,6 @@ app.get('/api', (req, res) => {
       health: '/health',
     },
     timestamp: new Date().toISOString(),
-  });
-});
-
-// Import auth middleware
-const { authenticateToken } = require('./middleware/auth');
-
-// Add dashboard endpoint for KPI data
-app.get('/api/dashboard', authenticateToken, (req, res) => {
-  // Return sample KPI data for now
-  res.json({
-    kpis: {
-      totalOrders: 156,
-      activeWorkOrders: 23,
-      completionRate: 87.5,
-      efficiency: 92.3,
-      onTimeDelivery: 94.1,
-      qualityScore: 98.2
-    },
-    recentActivity: [
-      { id: 1, type: 'order_completed', message: 'Manufacturing Order #MO-2024-001 completed', timestamp: new Date().toISOString() },
-      { id: 2, type: 'work_order_started', message: 'Work Order #WO-2024-045 started at Assembly Line 1', timestamp: new Date(Date.now() - 300000).toISOString() },
-      { id: 3, type: 'quality_check', message: 'Quality inspection passed for Batch #B-2024-012', timestamp: new Date(Date.now() - 600000).toISOString() }
-    ],
-    charts: {
-      production: [
-        { name: 'Mon', value: 120 },
-        { name: 'Tue', value: 135 },
-        { name: 'Wed', value: 148 },
-        { name: 'Thu', value: 142 },
-        { name: 'Fri', value: 156 },
-        { name: 'Sat', value: 98 },
-        { name: 'Sun', value: 87 }
-      ],
-      efficiency: [
-        { name: 'Line 1', value: 94 },
-        { name: 'Line 2', value: 87 },
-        { name: 'Line 3', value: 92 },
-        { name: 'Line 4', value: 89 }
-      ]
-    }
   });
 });
 
